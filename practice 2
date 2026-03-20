@@ -1,0 +1,33 @@
+import numpy as np
+from scipy.signal import find_peaks  # функция для поиска пиков (локальных максимумов) в сигнале
+from statsmodels.tsa.seasonal import seasonal_decompose
+from pylab import rcParams
+import matplotlib.pyplot as plt
+
+Fs = 1000  # частота дискретизации
+
+# В качестве временного ряда используем признак "2" (видно пики)
+signal = tsdf_c["2"].values
+
+# Поиск пиков (вершин импульсов) с ограничением: между пиками должно быть не менее 500 отсчётов
+peaks, _ = find_peaks(signal, distance=500)
+
+# Расчет интервалов между пиками (в секундах)
+rr_intervals = np.diff(peaks) / Fs
+
+# Расчет BPM (ударов в минуту)
+bpm = 60 / np.mean(rr_intervals)
+
+# Расчет периода по формуле из задания: period = (60/BPM) * Fs
+period = int((60 / bpm) * Fs)
+
+print(f"BPM: {bpm:.2f}")
+print(f"Период для декомпозиции: {period}")
+
+# задаем размер графика (как в лекции)
+rcParams['figure.figsize'] = 11, 9
+
+# применяем функцию декомпозиции к данным ЭКГ
+decompose = seasonal_decompose(tsdf_c["2"], period=period, model="additive")
+decompose.plot()
+plt.show()
